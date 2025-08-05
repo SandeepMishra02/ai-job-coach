@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from backend.ai.job_tools import generate_cover_letter
+from ai.job_tools import generate_cover_letter
 
 router = APIRouter()
 

@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import ai
+from routers import ai
+
+from dotenv import load_dotenv
+load_dotenv()
+
 
 app = FastAPI()
 
