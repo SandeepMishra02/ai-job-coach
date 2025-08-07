@@ -24,7 +24,7 @@ function App() {
           resume,
           job_description: jobDescription,
           // user_name: userName,
-          // company_name: companyName,
+          // company_name: companyName
         }),
       });
 
@@ -123,5 +123,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
