@@ -15,7 +15,7 @@ function App() {
     setLoading(true);
     setCoverLetter("");
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-cover-letter`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate_cover_letter`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
