@@ -1,128 +1,236 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
+type ApiRequest = {
+  resume: string;
+  job_description: string;
+  style: "concise" | "enthusiastic" | "professional" | "entry-level";
+  length: "short" | "medium" | "long";
+  user_name?: string;
+  company_name?: string;
+};
+
+type ApiResponse = {
+  cover_letter: string;
+  detail?: string; // for error responses
+};
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL as string;
+
+const MAX_CHARS = 25000;
+
+function useLocalStorage<T>(key: string, initial: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const s = localStorage.getItem(key);
+      return s ? (JSON.parse(s) as T) : initial;
+    } catch {
+      return initial;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
+  }, [key, value]);
+  return [value, setValue] as const;
+}
+
 function App() {
-  const [resume, setResume] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
+  const [resume, setResume] = useLocalStorage("resume", "");
+  const [jobDescription, setJobDescription] = useLocalStorage("jobDescription", "");
+  const [style, setStyle] = useLocalStorage<"concise" | "enthusiastic" | "professional" | "entry-level">(
+    "style",
+    "professional"
+  );
+  const [length, setLength] = useLocalStorage<"short" | "medium" | "long">("length", "medium");
+  const [userName, setUserName] = useLocalStorage("userName", "");
+  const [companyName, setCompanyName] = useLocalStorage("companyName", "");
+
   const [coverLetter, setCoverLetter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Optional if you want to support dynamic fields later
-  // const [userName, setUserName] = useState("");
-  // const [companyName, setCompanyName] = useState("");
+  const isDisabled = useMemo(() => {
+    return !resume.trim() || !jobDescription.trim() || loading;
+  }, [resume, jobDescription, loading]);
 
-  const generateCoverLetter = async () => {
+  const charResume = resume.length;
+  const charJD = jobDescription.length;
+
+  async function generateCoverLetter() {
     setLoading(true);
+    setErrorMsg(null);
     setCoverLetter("");
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-cover-letter`, {
+      const body: ApiRequest = {
+        resume,
+        job_description: jobDescription,
+        style,
+        length,
+        user_name: userName || undefined,
+        company_name: companyName || undefined,
+      };
+
+      const resp = await fetch(`${BACKEND}/generate-cover-letter`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resume,
-          job_description: jobDescription,
-          // user_name: userName,
-          // company_name: companyName
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate cover letter");
+      if (!resp.ok) {
+        // Handle common server errors / SlowAPI
+        if (resp.status === 429) {
+          throw new Error("You’re sending too many requests. Please wait a minute and try again.");
+        }
+        let msg = `Failed to generate cover letter (status ${resp.status}).`;
+        try {
+          const data = (await resp.json()) as ApiResponse;
+          if (data?.detail) msg = data.detail;
+        } catch {}
+        throw new Error(msg);
       }
 
-      const data = await response.json();
-      setCoverLetter(data.cover_letter);
-    } catch (error) {
-      console.error("Error generating cover letter:", error);
-      setCoverLetter("An error occurred while generating the cover letter.");
+      const data = (await resp.json()) as ApiResponse;
+      setCoverLetter(data.cover_letter || "");
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // ✅ Copy cover letter to clipboard
-  const copyToClipboard = () => {
-    if (coverLetter) {
-      navigator.clipboard.writeText(coverLetter);
-      alert("Cover letter copied to clipboard!");
-    }
-  };
+  function copyToClipboard() {
+    if (!coverLetter) return;
+    navigator.clipboard.writeText(coverLetter);
+    alert("Copied to clipboard!");
+  }
 
-  // ✅ Download cover letter as .txt
-  const downloadCoverLetter = () => {
-    if (coverLetter) {
-      const blob = new Blob([coverLetter], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.download = "cover_letter.txt";
-      link.href = url;
-      link.click();
-      URL.revokeObjectURL(url);
-    }
-  };
+  function printAsPDF() {
+    if (!coverLetter) return;
+    const w = window.open("", "_blank", "width=900,height=700");
+    if (!w) return;
+    w.document.write(`
+      <html>
+      <head>
+        <title>Cover Letter</title>
+        <style>
+          body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.5; padding: 32px; }
+          pre { white-space: pre-wrap; word-wrap: break-word; }
+          .meta { margin-bottom: 12px; color: #666 }
+        </style>
+      </head>
+      <body>
+        <div class="meta">Generated by AI Job Coach</div>
+        <pre>${coverLetter.replace(/</g, "&lt;")}</pre>
+        <script>window.print();</script>
+      </body>
+      </html>
+    `);
+    w.document.close();
+  }
+
+  function clearAll() {
+    setResume("");
+    setJobDescription("");
+    setUserName("");
+    setCompanyName("");
+    setCoverLetter("");
+    setErrorMsg(null);
+  }
 
   return (
-    <div style={{ maxWidth: 800, margin: "auto", padding: 20 }}>
-      <h1>AI Cover Letter Generator</h1>
+    <div className="page">
+      <header className="header">
+        <h1>AI Cover Letter Generator</h1>
+        <div className="badge">v1.0</div>
+      </header>
 
-      <label>Resume:</label>
-      <textarea
-        value={resume}
-        onChange={(e) => setResume(e.target.value)}
-        rows={6}
-        style={{ width: "100%" }}
-      />
-
-      <label>Job Description:</label>
-      <textarea
-        value={jobDescription}
-        onChange={(e) => setJobDescription(e.target.value)}
-        rows={6}
-        style={{ width: "100%" }}
-      />
-
-      {/* Optional inputs */}
-      {/* <label>Your Name:</label>
-      <input
-        type="text"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
-        style={{ width: "100%", marginBottom: 10 }}
-      />
-
-      <label>Company Name:</label>
-      <input
-        type="text"
-        value={companyName}
-        onChange={(e) => setCompanyName(e.target.value)}
-        style={{ width: "100%", marginBottom: 10 }}
-      /> */}
-
-      <button onClick={generateCoverLetter} disabled={loading} style={{ marginTop: 10 }}>
-        {loading ? "Generating..." : "Generate Cover Letter"}
-      </button>
-
-      {loading && <p>Generating your cover letter, please wait...</p>}
-
-      {!loading && coverLetter && (
-        <>
-          <h2>Generated Cover Letter</h2>
-          <pre>{coverLetter}</pre>
-
-          {/* 📋 Copy and 📄 Download buttons */}
-          <div style={{ marginTop: 10 }}>
-            <button onClick={copyToClipboard} style={{ marginRight: 10 }}>
-              Copy to Clipboard
-            </button>
-            <button onClick={downloadCoverLetter}>Download</button>
+      <section className="card">
+        <div className="row cols-2">
+          <div className="field">
+            <label>Resume</label>
+            <textarea
+              value={resume}
+              onChange={(e) => setResume(e.target.value.slice(0, MAX_CHARS))}
+              rows={10}
+              placeholder="Paste or type your resume highlights..."
+            />
+            <div className="counter">{charResume.toLocaleString()} / {MAX_CHARS.toLocaleString()}</div>
           </div>
-        </>
-      )}
+
+          <div className="field">
+            <label>Job Description</label>
+            <textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value.slice(0, MAX_CHARS))}
+              rows={10}
+              placeholder="Paste the job description..."
+            />
+            <div className="counter">{charJD.toLocaleString()} / {MAX_CHARS.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div className="row cols-4">
+          <div className="field">
+            <label>Your Name (optional)</label>
+            <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="e.g., Sandeep Mishra" />
+          </div>
+          <div className="field">
+            <label>Company Name (optional)</label>
+            <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="e.g., Acme Inc." />
+          </div>
+
+          <div className="field">
+            <label>Style</label>
+            <select value={style} onChange={(e) => setStyle(e.target.value as any)}>
+              <option value="professional">Professional</option>
+              <option value="concise">Concise</option>
+              <option value="enthusiastic">Enthusiastic</option>
+              <option value="entry-level">Entry-level</option>
+            </select>
+          </div>
+
+          <div className="field">
+            <label>Length</label>
+            <select value={length} onChange={(e) => setLength(e.target.value as any)}>
+              <option value="short">Short</option>
+              <option value="medium">Medium</option>
+              <option value="long">Long</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="actions">
+          <button className="primary" onClick={generateCoverLetter} disabled={isDisabled}>
+            {loading ? "Generating..." : "Generate Cover Letter"}
+          </button>
+          <button className="ghost" onClick={clearAll} disabled={loading}>
+            Clear
+          </button>
+          <div className="spacer" />
+          <div className="tip">Backend: <code>{BACKEND}</code></div>
+        </div>
+
+        {errorMsg && <div className="error">{errorMsg}</div>}
+      </section>
+
+      <section className="card">
+        <h2>Generated Cover Letter</h2>
+        <pre className="output">{coverLetter || "Your letter will appear here..."}</pre>
+
+        <div className="actions">
+          <button onClick={copyToClipboard} disabled={!coverLetter}>Copy to Clipboard</button>
+          <button onClick={printAsPDF} disabled={!coverLetter}>Print / Save as PDF</button>
+        </div>
+      </section>
+
+      <footer className="footer">
+        <div>© {new Date().getFullYear()} AI Job Coach. Built for demos and practice.</div>
+      </footer>
     </div>
   );
 }
 
-
 export default App;
+
