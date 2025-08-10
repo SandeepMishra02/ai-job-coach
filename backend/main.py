@@ -3,16 +3,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-# ✅ relative import from the same package
-from backend.routers import ai
+from .routers import ai
+from .routers import applications
+from .routers import analytics
+from .routers import interview
+from .db import init_db
 
 load_dotenv()
+init_db()
 
-app = FastAPI()
+app = FastAPI(title="AI Job Coach API")
 
-# CORS: your deployed Vercel URL + local dev
 ALLOWED_ORIGINS = [
-    "https://ai-job-coach-eight.vercel.app",  # change if your Vercel URL differs
+    "https://ai-job-coach-eight.vercel.app",  
     "http://localhost:5173",
 ]
 
@@ -24,10 +27,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the API router
+# Routers
 app.include_router(ai.router)
-
-
-
-
-
+app.include_router(applications.router)
+app.include_router(analytics.router)
+app.include_router(interview.router)
