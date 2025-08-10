@@ -1,16 +1,21 @@
-from fastapi import FastAPI, Request
+# backend/main.py
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
-from backend.routers import ai
-from backend.rate_limit import limiter, rate_limit_handler, SlowAPIMiddleware
+# ✅ relative import from the same package
+from .routers import ai
 
-app = FastAPI(title="AI Job Coach", version="1.0.0")
+load_dotenv()
 
-# CORS
+app = FastAPI()
+
+# CORS: your deployed Vercel URL + local dev
 ALLOWED_ORIGINS = [
-    "https://ai-job-coach-eight.vercel.app",
+    "https://ai-job-coach-eight.vercel.app",  # change if your Vercel URL differs
     "http://localhost:5173",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -19,21 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# SlowAPI (global)
-app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
-
-from slowapi.errors import RateLimitExceeded
-@app.exception_handler(RateLimitExceeded)
-async def _rate_limit_exceeded(request: Request, exc: RateLimitExceeded):
-    return rate_limit_handler(request, exc)
-
-# Routes
+# Mount the API router
 app.include_router(ai.router)
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
 
 
 
