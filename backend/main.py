@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 # ✅ relative import from the same package
-from .routers import ai
+from backend.routers import ai
 
 load_dotenv()
 
