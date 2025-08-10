@@ -1,32 +1,56 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+from typing import Literal, Optional
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from fastapi.responses import JSONResponse
+from fastapi import Request
+
 from ai.job_tools import generate_cover_letter
 
 router = APIRouter()
 
-class InputData(BaseModel):
-    resume: str
-    job_description: str
+# --- Rate limiting (10 requests per minute per IP) ---
+limiter = Limiter(key_func=get_remote_address)
 
-def generate_cover_letter(resume: str, job_description: str) -> str:
-    return f"""Dear Hiring Manager,
+@router.middleware("http")
+async def ratelimit_middleware(request: Request, call_next):
+    try:
+        response = await limiter.limit("10/minute")(call_next)(request)
+        return response
+    except RateLimitExceeded as exc:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Rate limit exceeded. Please wait a minute and try again."},
+        )
 
-I am writing to express my interest in the Software Engineering Intern position for Summer 2025.
+# --- Request/Response models ---
+class GenerateRequest(BaseModel):
+    resume: str = Field(min_length=1, max_length=20000)
+    job_description: str = Field(min_length=1, max_length=20000)
+    style: Optional[Literal["concise", "enthusiastic", "professional", "entry-level"]] = "professional"
+    user_name: Optional[str] = None
+    company_name: Optional[str] = None
 
-During my internship experience, I contributed to the following:
-{resume}
+class GenerateResponse(BaseModel):
+    cover_letter: str
 
-This role aligns perfectly with my skills and interests. Here's how:
-{job_description}
+# --- Endpoint ---
+@router.post("/generate-cover-letter", response_model=GenerateResponse)
+def generate(req: GenerateRequest) -> GenerateResponse:
+    try:
+        letter = generate_cover_letter(
+            resume=req.resume,
+            job_desc=req.job_description,
+            style=req.style or "professional",
+            user_name=req.user_name,
+            company_name=req.company_name,
+        )
+        return GenerateResponse(cover_letter=letter)
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Hide internals, return a user-friendly message
+        raise HTTPException(status_code=500, detail="Failed to generate cover letter. Please try again.")
 
-I am confident my background in software engineering, coupled with my eagerness to learn, make me a great fit.
-
-Thank you for your time and consideration.
-
-Sincerely,  
-John Doe
-"""
-
-@router.post("/generate-cover-letter")
-def generate(data: InputData):
-    return {"cover_letter": generate_cover_letter(data.resume, data.job_description)}
