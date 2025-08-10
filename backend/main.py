@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import ai
+from backend.routers import ai
 from backend.rate_limit import limiter, rate_limit_handler, SlowAPIMiddleware
 
 app = FastAPI(title="AI Job Coach", version="1.0.0")

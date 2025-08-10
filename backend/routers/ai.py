@@ -2,8 +2,9 @@ from typing import Optional, Literal
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from backend.rate_limit import limiter
-from ai.job_tools import generate_cover_letter
+from ..rate_limit import limiter
+from ..ai.job_tools import generate_cover_letter
+
 
 router = APIRouter()
 
