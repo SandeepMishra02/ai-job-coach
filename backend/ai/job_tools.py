@@ -1,24 +1,28 @@
-import os
-from openai import OpenAI
+from textwrap import fill
 
-# Reads OPENAI_API_KEY from env automatically if not passed
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# Model controls from env (with safe defaults)
-MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", "0.6"))
-MAX_TOKENS = int(os.getenv("OPENAI_MAX_TOKENS", "600"))
-
-def _style_instructions(style: str) -> str:
-    style = (style or "").lower()
+def _tone_prefix(style: str) -> str:
+    style = (style or "professional").lower()
     if style == "concise":
-        return "Be concise (150–220 words), direct tone, bullet highlights where useful."
+        return "I’m excited to submit my application."
     if style == "enthusiastic":
-        return "Use warm and enthusiastic tone, 180–260 words."
+        return "I’m thrilled to apply and contribute immediately."
     if style == "entry-level":
-        return "Assume limited experience; emphasize projects, coursework, and eagerness to learn; 180–240 words."
-    # professional default
-    return "Professional tone, structured into intro, 1–2 impact paragraphs, and closing; 180–260 words."
+        return "As a motivated early-career engineer, I’m eager to learn and make an impact."
+    return "I’m excited to apply and bring my experience to your team."
+
+def _length_blocks(length: str):
+    # Returns (intro_len, middle_len, closing_len) rough paragraph sentence counts
+    length = (length or "medium").lower()
+    if length == "short":
+        return (1, 2, 1)
+    if length == "long":
+        return (2, 4, 2)
+    return (1, 3, 1)
+
+def _summarize(text: str, max_sentences: int) -> str:
+    # Naive split for demo — not real NLP.
+    sentences = [s.strip() for s in text.replace("\n", " ").split(".") if s.strip()]
+    return ". ".join(sentences[:max_sentences]) + ("." if sentences else "")
 
 def generate_cover_letter(
     resume: str,
@@ -26,49 +30,56 @@ def generate_cover_letter(
     style: str = "professional",
     user_name: str | None = None,
     company_name: str | None = None,
+    length: str = "medium",
 ) -> str:
     """
-    Generates a tailored cover letter using OpenAI Chat Completions API.
+    Simple, deterministic letter composer. No external APIs needed.
     """
-    style_text = _style_instructions(style)
-    user_hint = ""
-    if user_name:
-        user_hint += f"Candidate name: {user_name}.\n"
-    if company_name:
-        user_hint += f"Target company: {company_name}.\n"
 
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are an expert technical recruiter and cover-letter writer. "
-                "Write tailored, specific, ATS-friendly cover letters with impact metrics."
-            ),
-        },
-        {
-            "role": "user",
-            "content": (
-                f"{user_hint}"
-                f"STYLE:\n{style_text}\n\n"
-                "INSTRUCTIONS:\n"
-                "- Tailor to the job description and mirror key responsibilities/skills.\n"
-                "- Pull 2–3 concrete achievements from the resume with metrics.\n"
-                "- Avoid generic fluff and overuse of buzzwords.\n"
-                "- Keep it one page, with a clear closing and call to action.\n\n"
-                f"RESUME:\n{resume}\n\n"
-                f"JOB DESCRIPTION:\n{job_desc}\n\n"
-                "Write the final cover letter below:\n"
-            ),
-        },
+    intro_n, middle_n, close_n = _length_blocks(length)
+
+    # Tiny "summaries" for templating
+    resume_highlights = _summarize(resume, middle_n)
+    job_needs = _summarize(job_desc, middle_n)
+    tone = _tone_prefix(style)
+
+    header = []
+    header.append("[Your Name]")
+    header.append("[Your Address]")
+    header.append("[City, State, Zip]")
+    header.append("[Your Email]")
+    header.append("[Your Phone Number]")
+    header.append("[Date]")
+    header_text = "\n".join(header)
+
+    salutation_company = company_name or "[Company's Name]"
+    hiring_manager = "[Hiring Manager's Name]"
+
+    intro = f"{tone} My background aligns well with what {salutation_company} is looking for."
+
+    middle_parts = [
+        f"In your description, I noticed you value: {job_needs}",
+        f"My relevant experience includes: {resume_highlights}",
+        "I’m comfortable with modern development practices and collaborating across teams.",
     ]
+    # Limit based on length
+    middle = " ".join(middle_parts[:middle_n])
 
-    resp = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=messages,
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS,
+    close = "Thank you for your time and consideration. I’d welcome the chance to discuss how I can help your team."
+    if style == "enthusiastic":
+        close = "Thank you for your time and consideration — I’d love to discuss how I can help your team move faster."
+
+    signature_name = user_name or "[Your Name]"
+
+    body = (
+        f"Dear {hiring_manager},\n\n"
+        f"{intro}\n\n"
+        f"{middle}\n\n"
+        f"{close}\n\n"
+        f"Sincerely,\n{signature_name}"
     )
-    return resp.choices[0].message.content.strip()
 
+    # Wrap lines for decent formatting
+    wrapped_body = "\n".join(fill(line, width=98) if line.strip() else "" for line in body.splitlines())
 
-
+    return header_text + "\n\n" + wrapped_body + "\n"
