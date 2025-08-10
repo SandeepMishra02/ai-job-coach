@@ -1,16 +1,15 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 from typing import Optional, Literal
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, Field
 
-from env.ratelimit import limiter
+from backend.rate_limit import limiter
 from ai.job_tools import generate_cover_letter
 
 router = APIRouter()
 
-# Request/Response models
 class GenerateRequest(BaseModel):
-    resume: str = Field(min_length=1, max_length=25_000)
-    job_description: str = Field(min_length=1, max_length=25_000)
+    resume: str = Field(min_length=1, max_length=20000)
+    job_description: str = Field(min_length=1, max_length=20000)
     style: Optional[Literal["concise", "enthusiastic", "professional", "entry-level"]] = "professional"
     length: Optional[Literal["short", "medium", "long"]] = "medium"
     user_name: Optional[str] = None
@@ -21,7 +20,7 @@ class GenerateResponse(BaseModel):
 
 @router.post("/generate-cover-letter", response_model=GenerateResponse)
 @limiter.limit("10/minute")
-def generate(req: GenerateRequest) -> GenerateResponse:
+def generate(req: GenerateRequest, request: Request) -> GenerateResponse:
     try:
         letter = generate_cover_letter(
             resume=req.resume,
@@ -36,6 +35,7 @@ def generate(req: GenerateRequest) -> GenerateResponse:
         raise
     except Exception:
         raise HTTPException(status_code=500, detail="Failed to generate cover letter. Please try again.")
+
 
 
 
