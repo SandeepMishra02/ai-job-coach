@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from sqlmodel import select
-from ..db import get_session
-from ..models import JobPosting
-from ..jobs_fetchers import fetch_greenhouse, fetch_lever
+from db import get_session
+from models import JobPosting
+from jobs_fetchers import fetch_greenhouse, fetch_lever
 import asyncio
 import os
 
