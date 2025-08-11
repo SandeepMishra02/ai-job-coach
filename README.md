@@ -15,7 +15,7 @@ A cloud-native web app that helps users **manage job applications**, **track pro
 ## 📸 Screenshots
 | Job Tracker | Interview Coach | Real-Time Jobs |
 |-------------|----------------|----------------|
-| ![Tailor Resume](assets/screenshots/resume_tailor.png) | ![Interview](assets/screenshots/interview_coach.png) | ![Jobs](assets/screenshots/jobs.png) |
+| ![Tailor Resume](docs/assets/screenshots/resume_tailor.png) | ![Interview](docs/assets/screenshots/interview_coach.png) | ![Jobs](docs/assets/screenshots/jobs.png) |
 
 ## 🧱 Tech Stack
 
