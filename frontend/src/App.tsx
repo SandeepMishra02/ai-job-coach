@@ -1,29 +1,30 @@
-// src/App.tsx
-import { useState } from "react";
-import GeneratorPage from "./pages/GeneratorPage.tsx";
-import ApplicationsPage from "./pages/ApplicationsPage.tsx";
-import AnalyticsPage from "./pages/AnalyticsPage.tsx";
-import InterviewPage from "./pages/InterviewPage.tsx";
-import TailorPage from "./pages/TailorPage.tsx";
+import { useEffect, useState } from "react";
 
-import { BASE_URL } from "./api";
+import GeneratorPage from "./pages/GeneratorPage";
+import ApplicationsPage from "./pages/ApplicationsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import InterviewPage from "./pages/InterviewPage";
+import TailorPage from "./pages/TailorPage";
 
-type Tab =
-  | "generator"
-  | "applications"
-  | "analytics"
-  | "interview"
-  | "tailor";
+import "./App.css";
+
+type Tab = "generator" | "applications" | "analytics" | "interview" | "tailor";
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("generator");
 
+  // Optional: expose a global setter so you can call (window as any).setAppTab("generator")
+  useEffect(() => {
+    (window as any).setAppTab = (t: Tab) => setTab(t);
+    return () => {
+      delete (window as any).setAppTab;
+    };
+  }, []);
+
   return (
     <div className="app">
       <header className="app-header">
-        <div className="brand">
-          AI Job Coach <span className="tag">v1.1</span>
-        </div>
+        <div className="brand">AI Job Coach v1.1</div>
         <nav className="tabs">
           <button
             className={tab === "generator" ? "active" : ""}
@@ -58,20 +59,21 @@ export default function App() {
         </nav>
       </header>
 
-      <main className="page">
+      <main className="content">
         {tab === "generator" && <GeneratorPage />}
         {tab === "applications" && <ApplicationsPage />}
         {tab === "analytics" && <AnalyticsPage />}
         {tab === "interview" && <InterviewPage />}
-        {tab === "tailor" && <TailorPage />}
+        {tab === "tailor" && (
+          <TailorPage
+            onBack={() => setTab("generator")}
+            // If you prefer to return to whatever tab you were on:
+            // onBack={() => setTab(prevTabRef.current)}
+          />
+        )}
       </main>
-
-      <footer className="app-footer">
-        <span>
-          Backend: <a href={BASE_URL}>{BASE_URL || "ENV NOT SET"}</a>
-        </span>
-        <span>© 2025 AI Job Coach. For demos and practice.</span>
-      </footer>
     </div>
   );
 }
+
+

@@ -15,8 +15,9 @@ init_db()
 app = FastAPI(title="AI Job Coach API")
 
 ALLOWED_ORIGINS = [
-    "https://ai-job-coach-eight.vercel.app",  
+    "https://ai-job-coach-eight.vercel.app",  # <-- your Vercel frontend
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
