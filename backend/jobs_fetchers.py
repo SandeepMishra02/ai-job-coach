@@ -1,23 +1,21 @@
 from __future__ import annotations
 import httpx
-from typing import List, Dict
+from typing import List, Dict, Any
 
-def fetch_lever(company: str) -> List[Dict]:
+def fetch_lever(company: str) -> List[Dict[str, Any]]:
     """
-    Returns a list of jobs from Lever for a given company slug.
-    Ignores 404 (company/board not found) and returns [] instead of raising.
+    Lever postings for a company slug. Returns [] on 404 or errors.
     """
     url = f"https://api.lever.co/v0/postings/{company}?mode=json"
     try:
         r = httpx.get(url, timeout=20)
         if r.status_code == 404:
-            # Company not on Lever (or wrong slug) — just skip
             return []
         r.raise_for_status()
         data = r.json()
-        jobs = []
+        out: List[Dict[str, Any]] = []
         for j in data:
-            jobs.append({
+            out.append({
                 "source": "lever",
                 "company": j.get("company", company),
                 "title": j.get("text"),
@@ -26,17 +24,13 @@ def fetch_lever(company: str) -> List[Dict]:
                 "createdAt": j.get("createdAt"),
                 "updatedAt": j.get("updatedAt"),
             })
-        return jobs
-    except httpx.HTTPStatusError:
-        # Non-404 errors: bubble up for logging upstream, or return [] to be lenient.
-        return []
+        return out
     except Exception:
         return []
 
-def fetch_greenhouse(board_token: str) -> List[Dict]:
+def fetch_greenhouse(board_token: str) -> List[Dict[str, Any]]:
     """
-    Greenhouse API (job board token differs per company).
-    Returns [] on 404; tolerates failures.
+    Greenhouse board jobs. Returns [] on 404 or errors.
     """
     url = f"https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs"
     try:
@@ -45,20 +39,19 @@ def fetch_greenhouse(board_token: str) -> List[Dict]:
             return []
         r.raise_for_status()
         data = r.json()
-        jobs = []
+        out: List[Dict[str, Any]] = []
         for j in data.get("jobs", []):
-            jobs.append({
+            out.append({
                 "source": "greenhouse",
                 "company": board_token,
                 "title": j.get("title"),
                 "location": (j.get("location") or {}).get("name"),
                 "url": j.get("absolute_url"),
-                "createdAt": j.get("updated_at") or j.get("created_at"),
+                "createdAt": j.get("created_at"),
                 "updatedAt": j.get("updated_at"),
             })
-        return jobs
-    except httpx.HTTPStatusError:
-        return []
+        return out
     except Exception:
         return []
+
 
