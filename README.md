@@ -1,90 +1,73 @@
 # AI-Smart Job Application Tracker & Interview Coach
 
-A cloud-native web app that helps users manage job applications, track progress, and prepare for interviews with AI-powered personalization. Designed to streamline the job hunt with tailored resumes, mock interviews, and real-time analytics.
-
----
+A cloud-native web app that helps users **manage job applications**, **track progress**, and get **AI-powered personalized interview preparation**, now with **real-time internship job listings** from top companies.
 
 ## 🎯 Features
-- **AI-Driven Resume & Cover Letter Tailoring** – Generates customized resumes and cover letters using GPT based on the specific job description.
-- **Interactive Mock Interview Coach** – Simulates interview scenarios with chatbot-style Q&A, offering feedback and preparation tips.
-- **Job Application Tracker** – Manage applications across multiple stages and get success-rate insights.
-- **Analytics Dashboard** – Visualize application progress and identify trends to improve your chances.
-- **Secure User Authentication** – OAuth2 + JWT for login and session management.
-- **Scalable Backend & Infra** – Built with FastAPI, PostgreSQL, Redis, Docker, and Terraform for cloud deployment.
-
----
+- **Resume & cover letter tailoring** powered by GPT
+- **Job application tracker** with multi-step progress tracking
+- **Mock interview generator** with chatbot-style Q&A
+- **Analytics dashboard** (e.g., application success rate, stage distribution)
+- **Real-time software engineering internship jobs** fetched from Lever & Greenhouse APIs
+- **OAuth2-based authentication** for secure login
+- **PostgreSQL + Redis backend** for persistent and cached data
+- **Fully containerized** and deployable with Docker & Terraform
 
 ## 📸 Screenshots
-
-**Interview Coach**  
-![Interview Coach](docs/assets/screenshots/interview_coach.png)
-
-**Cover Letter Generator**  
-![Cover Letter Generator](docs/assets/screenshots/cover_letter.png)
-
-**Resume Tailor**  
-![Resume Tailor](docs/assets/screenshots/resume_tailor.png)
-
----
+| Job Tracker | Interview Coach | Real-Time Jobs |
+|-------------|----------------|----------------|
+| ![Tailor Resume](assets/screenshots/resume_tailor.png) | ![Interview](assets/screenshots/interview_coach.png) | ![Jobs](assets/screenshots/jobs.png) |
 
 ## 🧱 Tech Stack
 
-| Layer           | Technology                              |
-|-----------------|-----------------------------------------|
-| Frontend        | React + TypeScript + Tailwind CSS       |
-| Backend         | FastAPI                                 |
-| Database        | PostgreSQL + Redis (cache)              |
-| AI/ML           | OpenAI / PaLM API                       |
-| DevOps          | Docker, Kubernetes, GitHub Actions      |
-| Infra           | Terraform (AWS/GCP)                     |
-| Auth & Security | OAuth2, JWT, HTTPS, encryption          |
-
----
+| Layer           | Technology                               |
+|-----------------|------------------------------------------|
+| Frontend        | React + TypeScript + Tailwind CSS         |
+| Backend         | FastAPI (Python)                          |
+| Database        | PostgreSQL + Redis (cache)               |
+| AI/ML           | OpenAI / PaLM API                         |
+| DevOps          | Docker, Kubernetes, GitHub Actions        |
+| Infra           | Terraform (AWS/GCP)                       |
+| Auth & Security | OAuth2, JWT, HTTPS, encryption            |
 
 ## 📂 Monorepo Structure
 ```
-frontend/    # React + Tailwind frontend
-backend/     # FastAPI backend
-data.db      # SQLite/PostgreSQL data storage
+/frontend   # React + TypeScript client
+/backend    # FastAPI backend, job fetchers, API routes
 ```
-
----
 
 ## 🚀 Getting Started
 
-1. **Clone this repo**
+1. **Clone the repo**
 ```bash
 git clone https://github.com/SandeepMishra02/ai-job-coach.git
 cd ai-job-coach
 ```
 
-2. **Install dependencies**
+2. **Setup backend**
 ```bash
-# Backend
 cd backend
 pip install -r requirements.txt
-
-# Frontend
-cd frontend
-npm install
+uvicorn main:app --reload
 ```
 
-3. **Run the app**
+3. **Setup frontend**
 ```bash
-# Backend
-uvicorn main:app --reload
-
-# Frontend
+cd frontend
+npm install
 npm run dev
 ```
 
-4. **Open in browser**  
-Visit `http://localhost:3000` to view the app.
+4. **Open in browser**
+```
+Frontend: http://localhost:5173
+Backend API: http://localhost:8000
+```
 
 ---
+**Author:** Sandeep Mishra  
+**License:** MIT
 
-## 📜 License
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+
 
 
 
