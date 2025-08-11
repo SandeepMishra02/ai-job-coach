@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 import httpx
 import asyncio
-from ..jobs_fetchers import fetch_for_slug, Job
+from jobs_fetchers import fetch_for_slug, Job
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
