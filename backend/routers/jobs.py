@@ -2,7 +2,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict
 
-from ..jobs_fetchers import fetch_lever, fetch_greenhouse
+from jobs_fetchers import fetch_lever, fetch_greenhouse
 
 router = APIRouter(tags=["jobs"])
 
