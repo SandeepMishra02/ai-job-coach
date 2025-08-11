@@ -12,10 +12,24 @@ A cloud-native web app that helps users **manage job applications**, **track pro
 - **PostgreSQL + Redis backend** for persistent and cached data
 - **Fully containerized** and deployable with Docker & Terraform
 
-## 📸 Screenshots
-| Job Tracker | Interview Coach | Real-Time Jobs |
-|-------------|----------------|----------------|
-| ![Tailor Resume](docs/assets/screenshots/resume_tailor.png) | ![Interview](docs/assets/screenshots/interview_coach.png) | ![Jobs](docs/assets/screenshots/jobs.png) |
+## 📷 Screenshots
+
+<p align="center">
+  <figure>
+    <img src="docs/assets/screenshots/job_tracker.png" alt="Job Tracker" width="400"/>
+    <figcaption><b>Job Tracker</b></figcaption>
+  </figure>
+  <figure>
+    <img src="docs/assets/screenshots/interview_coach.png" alt="Interview Coach" width="400"/>
+    <figcaption><b>Interview Coach</b></figcaption>
+  </figure>
+  <figure>
+    <img src="docs/assets/screenshots/real_time_jobs.png" alt="Real-Time Jobs" width="400"/>
+    <figcaption><b>Real-Time Jobs</b></figcaption>
+  </figure>
+</p>
+
+
 
 ## 🧱 Tech Stack
 
