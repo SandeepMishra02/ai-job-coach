@@ -12,22 +12,31 @@ A cloud-native web app that helps users **manage job applications**, **track pro
 - **PostgreSQL + Redis backend** for persistent and cached data
 - **Fully containerized** and deployable with Docker & Terraform
 
-## 📷 Screenshots
+## 📸 Screenshots
 
 <p align="center">
-  <figure>
-    <img src="docs/assets/screenshots/resume_tailor.png" alt="Resume Tailor" width="800"/>
-    <figcaption><b>Job Tracker</b></figcaption>
-  </figure>
-  <figure>
-    <img src="docs/assets/screenshots/interview_coach.png" alt="Interview Coach" width="800"/>
-    <figcaption><b>Interview Coach</b></figcaption>
-  </figure>
-  <figure>
-    <img src="docs/assets/screenshots/jobs.png" alt="Real-Time Jobs" width="800"/>
-    <figcaption><b>Real-Time Jobs</b></figcaption>
-  </figure>
+  <table>
+    <tr>
+      <td align="center">
+        <img src="docs/assets/screenshots/jobs.png" alt="Real-Time Jobs" width="800"/><br/>
+        <b>Real-Time Jobs</b>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/assets/screenshots/resume_tailor.png" alt="Resume Tailor" width="500"/><br/>
+        <b>Resume Tailor</b>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/assets/screenshots/interview_coach.png" alt="Interview Coach" width="800"/><br/>
+        <b>Interview Coach</b>
+      </td>
+    </tr>
+  </table>
 </p>
+
 
 
 
