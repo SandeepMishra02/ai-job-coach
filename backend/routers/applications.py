@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 from typing import List
 
-from ..db import get_session
-from ..models import Application
+from db import get_session
+from models import Application
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 

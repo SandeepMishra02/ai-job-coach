@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import func
 from sqlmodel import select
 
-from ..db import get_session
-from ..models import Application
+from db import get_session
+from models import Application
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 

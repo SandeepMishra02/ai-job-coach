@@ -3,8 +3,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Literal, Optional
 
-from ..rate_limit import limiter
-from ..ai.job_tools import generate_cover_letter, tailor_resume
+from rate_limit import limiter
+from ai.job_tools import generate_cover_letter, tailor_resume
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
