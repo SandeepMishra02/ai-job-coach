@@ -15,26 +15,14 @@ A cloud-native web app that helps users **manage job applications**, **track pro
 ## 📸 Screenshots
 
 <p align="center">
-  <table>
-    <tr>
-      <td align="center">
-        <img src="docs/assets/screenshots/jobs.png" alt="Real-Time Jobs" width="800"/><br/>
-        <b>Real-Time Jobs</b>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        <img src="docs/assets/screenshots/resume_tailor.png" alt="Resume Tailor" width="500"/><br/>
-        <b>Resume Tailor</b>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        <img src="docs/assets/screenshots/interview_coach.png" alt="Interview Coach" width="800"/><br/>
-        <b>Interview Coach</b>
-      </td>
-    </tr>
-  </table>
+  <b>Real-Time Jobs</b><br/>
+  <img src="docs/assets/screenshots/jobs.png" alt="Real-Time Jobs" width="800"/><br/><br/>
+
+  <b>Resume Tailor</b><br/>
+  <img src="docs/assets/screenshots/resume_tailor.png" alt="Resume Tailor" width="800"/><br/><br/>
+
+  <b>Interview Coach</b><br/>
+  <img src="docs/assets/screenshots/interview_coach.png" alt="Interview Coach" width="800"/>
 </p>
 
 
