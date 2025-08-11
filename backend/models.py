@@ -48,3 +48,17 @@ class ApplicationUpdate(SQLModel):
     status: Optional[ApplicationStatus] = None
     notes: Optional[str] = None
     applied_at: Optional[datetime] = None
+
+
+
+class JobPosting(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    source: str                          # "greenhouse" | "lever"
+    board: Optional[str] = None          # board token / company handle
+    company: str
+    title: str
+    location: Optional[str] = None
+    url: str = Field(index=True, unique=True)   # canonical job URL
+    remote: Optional[bool] = None
+    posted_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)

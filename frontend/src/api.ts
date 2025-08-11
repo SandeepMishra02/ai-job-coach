@@ -112,5 +112,39 @@ export const api = {
 
   // Analytics
   analyticsOverview: () => request<AnalyticsOverview>("/analytics/overview"),
+
+  
+  listJobs: (params: {
+    q?: string;
+    company?: string;
+    location?: string;
+    remote?: boolean;
+    limit?: number;
+  }) =>
+    request<JobPosting[]>(
+      `/jobs?${new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")
+        ) as Record<string, string>
+      ).toString()}`
+    ),
+
+  refreshJobs: () => request<{ added: number; total: number }>(`/jobs/refresh`, { method: "POST" }),
+  
 };
+
+// ---- Live Jobs ----
+export type JobPosting = {
+  id: number;
+  source: string;
+  board?: string | null;
+  company: string;
+  title: string;
+  location?: string | null;
+  url: string;
+  remote?: boolean | null;
+  posted_at?: string | null;
+  created_at: string;
+};
+
 

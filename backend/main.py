@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from dotenv import load_dotenv
 
-from routers import ai, applications, analytics, interview
+from routers import ai, applications, analytics, interview, jobs
 from db import init_db
 
 load_dotenv()
@@ -31,5 +31,5 @@ app.include_router(ai.router)
 app.include_router(applications.router)
 app.include_router(analytics.router)
 app.include_router(interview.router)
-
+app.include_router(jobs.router)
 
